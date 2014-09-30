@@ -22,7 +22,12 @@
 	// Data model
 	// Layers -> sequence of Positions & E
 
-	
+	// Config
+	$waitBetweenMoves = 500; //ms
+	$n = 15; // Take a node, each n nodes
+	$nl = 5; // Take a layer, each nl layers
+
+
 	// Load file
 	$data = file( $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
@@ -167,8 +172,8 @@
 	// Postprocessing goes here
 
 	// Downsample mesh
-	$n = 5; // Take a node, each n nodes
-	$nl = 3; // Take a layer, each nl layers
+	//moved to top - $n = 15; // Take a node, each n nodes
+	//$nl = 5; // Take a layer, each nl layers
 
 	$layersSimple = Array();
 
@@ -212,6 +217,7 @@
 		// Goto Node 0 without extruding
 		echo "G0" . ' X' . $nodes[0]['X'] . ' Y' . $nodes[0]['Y'] . ' Z' . $nodes[0]['Z'] . "\n";
 
+
 		foreach( $nodes as $node ) {
 
 			// Draw the layer
@@ -222,6 +228,7 @@
 				echo "G0" . ' X' . $node['X'] . ' Y' . $node['Y'] . ' Z' . $node['Z'] . "\n";
 			} else {
 				echo "G1" . ' X' . $node['X'] . ' Y' . $node['Y'] . ' Z' . $node['Z'] . ' E' . $E . "\n";
+				echo "G4 P$waitBetweenMoves\n"; // wait for z ms
 			}
 
 			$prevPoint = $node;
@@ -232,7 +239,7 @@
 			$bestkk = false;
 			$bestNode = Array();
 			$minDist = -1; // -1 = disabled
-			$maxDist = 3; // 99999 = disabled
+			$maxDist = 3*($nl/2); // 99999 = disabled
 
 			// lookup
 			foreach( $nodesUp as $kk=>$nodeUp ) {
@@ -249,6 +256,7 @@
 				#DEBUG# echo "UPPER LAYER $k+$nl: G1 " . ' X' . $bestNode['X'] . ' Y' . $bestNode['Y'] . ' Z' . $bestNode['Z'] . "\n";			
 				$E += ($dErate * distance($bestNode, $prevPoint) );
 				echo "G1" . ' X' . $bestNode['X'] . ' Y' . $bestNode['Y'] . ' Z' . $bestNode['Z'] . ' E' . $E . "\n";
+				echo "G4 P$waitBetweenMoves\n"; // wait for z ms
 
 				$prevPoint = $node;
 			}
